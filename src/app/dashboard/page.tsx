@@ -49,6 +49,9 @@ function BasicTable({rows, clickEvent}: { rows: Rank[], clickEvent: (packageName
     ) ;
 }
 
+const defaultStart = "2022-01-01" ;
+const defaultEnd = "2023-01-01" ;
+
 export default function Dashboard(): JSX.Element {
     const router = useRouter() ;
     const handleClick = (pkg: string) => {
@@ -59,8 +62,8 @@ export default function Dashboard(): JSX.Element {
     const refRequest = useRef(new NextRequest(`${process.env.NEXT_PUBLIC_URL}/api/dashboard`)) ;
     const searchParams = refRequest.current.nextUrl.searchParams ;
     useMount(() => {
-        searchParams.set("start", "2023-01-01") ;
-        searchParams.set("end", "2023-01-31") ;
+        searchParams.set("start", defaultStart) ;
+        searchParams.set("end", defaultEnd) ;
         searchParams.set("timeUnitEnum", TimeUnit.DAY) ;
         searchParams.set("statTypeEnum", StatType.GITHUB) ;
         searchParams.set("limit", "10") ;
@@ -91,6 +94,8 @@ export default function Dashboard(): JSX.Element {
                 overflow     : "auto",
             }}>
                 <Picker
+                    defaultEnd={defaultEnd}
+                    defaultStart={defaultStart}
                     changeStart={(newValue: string) => {
                         searchParams.set("start", newValue) ;
                         setTrigger(true) ;
@@ -105,7 +110,12 @@ export default function Dashboard(): JSX.Element {
                     }}
                 />
                 <div
-                    style={{height: "90%", width: "100%", padding: "2rem 0rem", display: "flex", flexDirection: "column"}}>
+                    style={{height   : "90%",
+                        width        : "100%",
+                        padding      : "2rem 0rem",
+                        display      : "flex",
+                        flexDirection: "column",
+                    }}>
                     <h2 style={{textAlign: "center"}}>Github 热门包排名</h2>
                     <div style={{margin: "2rem 16rem", flex: 1, overflow: "visible"}}>
                         <BasicTable rows={data} clickEvent={handleClick}/>

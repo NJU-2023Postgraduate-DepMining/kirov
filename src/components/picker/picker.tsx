@@ -9,18 +9,24 @@ import {DatePicker} from "@mui/x-date-pickers/DatePicker" ;
  * format: YYYY-MM-DD
  */
 export interface PickerProps {
+    defaultStart: string,
+    defaultEnd: string,
     changeStart: (value: string) => void,
     changeEnd: (value: string) => void,
     changeType: (value: StatType) => void,
 }
 
-export default function Picker({changeStart, changeEnd, changeType}: {
-    changeStart: Function,
-    changeEnd: Function,
-    changeType: Function,
-}) {
-    const [startDay, setStartDay] = useState<Dayjs>(dayjs("2022-01-01")) ;
-    const [endDay, setEndDay] = useState<Dayjs>(dayjs("2023-01-01")) ;
+export default function Picker(props: PickerProps) {
+    const {
+              defaultStart,
+              defaultEnd,
+              changeStart,
+              changeEnd,
+              changeType,
+          } = props ;
+
+    const [startDay, setStartDay] = useState<Dayjs>(dayjs(defaultStart)) ;
+    const [endDay, setEndDay] = useState<Dayjs>(dayjs(defaultEnd)) ;
     const [type, setType] = useState<string>(StatType.NPM) ;
 
     const handleStart = (newValue: Dayjs | null) => {
@@ -36,9 +42,11 @@ export default function Picker({changeStart, changeEnd, changeType}: {
         }
     } ;
     const handleType = (event: SelectChangeEvent) => {
-        setType(event.target.value) ;
+        const type = event.target.value as StatType ;
+        setType(type) ;
         changeType(type) ;
     } ;
+
     return (
         <div style={{display: "flex"}}>
             <DemoContainer components={["DatePicker", "DatePicker"]}>

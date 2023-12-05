@@ -1,14 +1,16 @@
-"use client" ;
+"use client";
 
-import {JSX, Suspense, useEffect, useRef} from "react" ;
-import {LineChart} from "@/third-parties/@mui/x-charts" ;
-import {PackageNameAndVersion, Tendency} from "@/types/package" ;
-import {NextRequest} from "next/server" ;
-import {TimeUnit} from "@/common/enums/time-unit" ;
-import {StatType} from "@/common/enums/stat-type" ;
-import style from "./page.module.css" ;
-import {useMount, useSafeState} from "ahooks" ;
-import Picker from "@/components/picker/picker" ;
+import {JSX, Suspense, useEffect, useRef} from "react";
+import {LineChart} from "@/third-parties/@mui/x-charts";
+import {PackageNameAndVersion, Tendency} from "@/types/package";
+import {NextRequest} from "next/server";
+import {TimeUnit} from "@/common/enums/time-unit";
+import {StatType} from "@/common/enums/stat-type";
+import style from "./page.module.css";
+import {useMount, useSafeState} from "ahooks";
+import Picker from "@/components/picker/picker";
+import TimeUnitPicker from "@/components/time-unit-picker";
+import Box from "@mui/material/Box";
 
 function BasicLineChart({x, y}: { x: number[], y: number[] }): JSX.Element {
     return (
@@ -28,6 +30,9 @@ interface TrendProps {
     params: PackageNameAndVersion;
 }
 
+const defaultStart = "2022-01-01" ;
+const defaultEnd = "2023-01-01" ;
+
 export default function Trend(props: TrendProps): JSX.Element {
     const {
               params: {
@@ -39,8 +44,8 @@ export default function Trend(props: TrendProps): JSX.Element {
     const refRequest = useRef(new NextRequest(`${process.env.NEXT_PUBLIC_URL}/api/package/${packageName}/${version}/be-dependent-on-amount`)) ;
     const searchParams = refRequest.current.nextUrl.searchParams ;
     useMount(() => {
-        searchParams.set("start", "2022-01-01") ;
-        searchParams.set("end", "2023-12-01") ;
+        searchParams.set("start", defaultStart) ;
+        searchParams.set("end", defaultEnd) ;
         searchParams.set("timeUnitEnum", TimeUnit.DAY) ;
         searchParams.set("statTypeEnum", StatType.NPM) ;
     }) ;
@@ -69,35 +74,54 @@ export default function Trend(props: TrendProps): JSX.Element {
     return (
         <div className={style.wrapper}>
             <span className={style.title}>被依赖趋势图</span>
-            <Picker
-                changeStart={(newValue: string) => {
-                    searchParams.set("start", newValue) ;
-                    setTrigger(true) ;
+            <Box
+                sx={{
+                    display       : "flex",
+                    flexDirection : "row",
+                    justifyContent: "space-between",
+                    alignItems    : "center",
                 }}
-                changeEnd={(newValue: string) => {
-                    searchParams.set("end", newValue) ;
+            >
+                <Picker
+                    defaultStart={defaultStart}
+                    defaultEnd={defaultEnd}
+                    changeStart={(newValue: string) => {
+                        searchParams.set("start", newValue) ;
+                        setTrigger(true) ;
+                    }}
+                    changeEnd={(newValue: string) => {
+                        searchParams.set("end", newValue) ;
+                        setTrigger(true) ;
+                    }}
+                    changeType={(newValue: string) => {
+                        searchParams.set("statTypeEnum", newValue) ;
+                        setTrigger(true) ;
+                    }}
+                />
+                <TimeUnitPicker onChange={(newValue: TimeUnit) => {
+                    searchParams.set("timeUnitEnum", newValue) ;
                     setTrigger(true) ;
-                }}
-                changeType={(newValue: string) => {
-                    searchParams.set("statTypeEnum", newValue) ;
-                    setTrigger(true) ;
-                }}
-            />
+                }}/>
+            </Box>
             <Suspense fallback={
                 <>
-                    ...Loading
+                    {"...Loading"}
                 </>
             }>
-                <div className={style.chart}>
-                    {
-                        timeData.length > 0 ? <BasicLineChart x={timeData} y={countData}/> :
-                        <>
-                            {
-                                content
-                            }
-                        </>
-                    }
-                </div>
+                {
+                    !trigger
+                    ? <div className={style.chart}>
+                        {
+                            timeData.length > 0 ? <BasicLineChart x={timeData} y={countData}/> :
+                            <>
+                                {
+                                    content
+                                }
+                            </>
+                        }
+                    </div>
+                    : <>{"...Loading"}</>
+                }
             </Suspense>
         </div>
     ) ;

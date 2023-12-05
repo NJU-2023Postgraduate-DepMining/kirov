@@ -10,6 +10,18 @@
 
 Next.js based front-end for cloud native app DepMining
 
+## 本地测试生产环境
+
+根目录下创建 `.env.local` 文件
+
+```
+URL=http://172.29.4.74:30017
+```
+
+或者替换为后端暴露的外部接口
+
+
+
 
 ## Vercel 部署
 
